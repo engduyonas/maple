@@ -1,8 +1,13 @@
 /**
  * Social preview card (1200×630) — @vercel/og / Satori layout.
- * Designed for “summary_large_image” style previews (e.g. Telegram, X).
+ * Brand mark is passed as a data URL from public/brand/maple-leaf-og.svg.
  */
-export function BrandOgContent() {
+type BrandOgContentProps = {
+  /** data: URL (SVG) for the maple leaf, loaded in opengraph-image / twitter-image */
+  logoSrc: string;
+};
+
+export function BrandOgContent({ logoSrc }: BrandOgContentProps) {
   return (
     <div
       style={{
@@ -54,8 +59,8 @@ export function BrandOgContent() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: 20,
-          padding: "60px 80px",
+          gap: 22,
+          padding: "56px 80px",
           zIndex: 1,
         }}
       >
@@ -64,32 +69,30 @@ export function BrandOgContent() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: 120,
-            height: 120,
-            borderRadius: 24,
-            background: "rgba(255, 255, 255, 0.12)",
-            border: "2px solid rgba(255, 255, 255, 0.25)",
-            marginBottom: 8,
+            width: 220,
+            height: 220,
+            borderRadius: 32,
+            background: "rgba(255, 255, 255, 0.1)",
+            border: "2px solid rgba(255, 255, 255, 0.28)",
+            boxShadow: "0 12px 48px rgba(0,0,0,0.3)",
+            overflow: "hidden",
+            marginBottom: 6,
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              color: "#ffffff",
-              fontSize: 56,
-              fontWeight: 800,
-              letterSpacing: -2,
-            }}
-          >
-            MLF
-          </div>
+          <img
+            src={logoSrc}
+            width={180}
+            height={180}
+            alt=""
+            style={{ objectFit: "contain" }}
+          />
         </div>
 
         <div
           style={{
             display: "flex",
             color: "#ffffff",
-            fontSize: 64,
+            fontSize: 62,
             fontWeight: 800,
             letterSpacing: -1,
             lineHeight: 1.1,
@@ -103,7 +106,7 @@ export function BrandOgContent() {
           style={{
             display: "flex",
             color: "rgba(255, 255, 255, 0.95)",
-            fontSize: 38,
+            fontSize: 36,
             fontWeight: 600,
             textAlign: "center",
             maxWidth: 920,
@@ -122,7 +125,7 @@ export function BrandOgContent() {
             textAlign: "center",
             maxWidth: 900,
             lineHeight: 1.45,
-            marginTop: 8,
+            marginTop: 4,
           }}
         >
           Global food company on a journey through better nutrition, safer food, humane
