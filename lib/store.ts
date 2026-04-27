@@ -2,32 +2,10 @@ import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 
 // ═══════════════════════════════════════════════════
-//  Server-side in-memory cache
-//  Avoids hitting MongoDB on every request.
-//  Automatically invalidated on any write operation.
-// ═══════════════════════════════════════════════════
-
-let employeeCache: Employee[] | null = null;
-let cacheTTLTimer: ReturnType<typeof setTimeout> | null = null;
-const CACHE_TTL = 30_000; // 30 seconds
-
-function getCached(): Employee[] | null {
-  return employeeCache;
-}
-
-function setCache(data: Employee[]): void {
-  employeeCache = data;
-  if (cacheTTLTimer) clearTimeout(cacheTTLTimer);
-  cacheTTLTimer = setTimeout(() => { employeeCache = null; }, CACHE_TTL);
-}
-
-function invalidateCache(): void {
-  employeeCache = null;
-  if (cacheTTLTimer) { clearTimeout(cacheTTLTimer); cacheTTLTimer = null; }
-}
-
-// ═══════════════════════════════════════════════════
 //  Employee CRUD — MongoDB
+//  (No in-memory list cache: on Vercel each serverless
+//  instance has separate memory, so a cached [] on one
+//  instance would not be invalidated by writes on another.)
 // ═══════════════════════════════════════════════════
 
 export interface Employee {
@@ -69,18 +47,13 @@ function toEmployee(doc: EmployeeDoc): Employee {
 }
 
 export async function getAllEmployees(): Promise<Employee[]> {
-  const cached = getCached();
-  if (cached) return cached;
-
   const db = await getDb();
   const docs = await db
     .collection<EmployeeDoc>("employees")
     .find()
     .sort({ createdAt: -1 })
     .toArray();
-  const employees = docs.map(toEmployee);
-  setCache(employees);
-  return employees;
+  return docs.map(toEmployee);
 }
 
 export async function createEmployee(data: Omit<Employee, "id" | "createdAt">): Promise<Employee> {
@@ -90,7 +63,6 @@ export async function createEmployee(data: Omit<Employee, "id" | "createdAt">): 
     createdAt: new Date().toISOString(),
   };
   const result = await db.collection("employees").insertOne(doc);
-  invalidateCache();
   return {
     ...data,
     id: result.insertedId.toHexString(),
@@ -105,7 +77,6 @@ export async function updateEmployeeStatus(id: string, status: string): Promise<
     { $set: { status } },
     { returnDocument: "after" }
   );
-  invalidateCache();
   return result ? toEmployee(result) : null;
 }
 
@@ -130,14 +101,12 @@ export async function updateEmployee(
     { $set: updates },
     { returnDocument: "after" }
   );
-  invalidateCache();
   return result ? toEmployee(result) : null;
 }
 
 export async function deleteEmployee(id: string): Promise<boolean> {
   const db = await getDb();
   const result = await db.collection("employees").deleteOne({ _id: new ObjectId(id) });
-  invalidateCache();
   return result.deletedCount === 1;
 }
 

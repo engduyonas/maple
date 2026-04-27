@@ -18,9 +18,7 @@ export async function GET() {
   try {
     const employees = await getAllEmployees();
     return NextResponse.json(employees, {
-      headers: {
-        "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30",
-      },
+      headers: { "Cache-Control": "no-store" },
     });
   } catch {
     return NextResponse.json(

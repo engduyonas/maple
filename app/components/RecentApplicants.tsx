@@ -1,10 +1,10 @@
+import { unstable_noStore } from "next/cache";
 import { isMongoConfigured } from "@/lib/mongodb";
 import { getAllEmployees, type Employee } from "@/lib/store";
 import ApplicantsList from "@/app/components/ApplicantsList";
 
-export const dynamic = "force-dynamic";
-
 async function fetchApplicants(): Promise<Employee[]> {
+  unstable_noStore();
   if (!isMongoConfigured()) return [];
   try {
     return await getAllEmployees();
