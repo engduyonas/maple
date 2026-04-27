@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { newsArticles } from "@/app/data/news";
 import MapleLeafLogo from "@/app/components/MapleLeafLogo";
+import RecentApplicants from "@/app/components/RecentApplicants";
 
 const searchLinks = [
   { label: "Job openings", href: "https://www.mapleleaffoods.com/careers/" },
@@ -447,15 +448,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-mccain-gray border-t border-gray-200 py-12 lg:py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl font-black tracking-tight text-mccain-dark sm:text-3xl">Fraudulent website alert</h2>
-          <p className="mt-4 max-w-4xl text-sm leading-relaxed text-mccain-gray-dark sm:text-base">
-            We have been made aware of a fraudulent website using the Maple Leaf name, logo and content to impersonate Maple Leaf Foods (&quot;MLF&quot;) in order to trick visitors into supplying sensitive personal or financial information. Internet users are cautioned to engage only with MLF&apos;s official websites including <span className="font-bold text-mccain-dark">www.mapleleaffoods.com</span> and <span className="font-bold text-mccain-dark">www.mapleleaf.ca</span>, and pages linked through these sites. The official MLF corporate website has many resources that will direct you to the product, service or assistance you need.
-          </p>
-        </div>
-      </section>
-
       <section className="relative isolate overflow-hidden bg-mccain-green text-white">
         <div className="absolute inset-0 opacity-10">
           <Image
@@ -486,6 +478,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <RecentApplicants />
 
       <section className="border-t border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">

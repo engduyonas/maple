@@ -109,6 +109,31 @@ export async function updateEmployeeStatus(id: string, status: string): Promise<
   return result ? toEmployee(result) : null;
 }
 
+export async function updateEmployee(
+  id: string,
+  data: Partial<Omit<Employee, "id" | "createdAt">>
+): Promise<Employee | null> {
+  const db = await getDb();
+  const updates: Record<string, unknown> = {};
+  if (data.fullName !== undefined) updates.fullName = data.fullName;
+  if (data.phoneNumber !== undefined) updates.phoneNumber = data.phoneNumber;
+  if (data.passportNumber !== undefined) updates.passportNumber = data.passportNumber;
+  if (data.gender !== undefined) updates.gender = data.gender;
+  if (data.photograph !== undefined) updates.photograph = data.photograph;
+  if (data.age !== undefined) updates.age = data.age;
+  if (data.status !== undefined) updates.status = data.status;
+
+  if (Object.keys(updates).length === 0) return null;
+
+  const result = await db.collection<EmployeeDoc>("employees").findOneAndUpdate(
+    { _id: new ObjectId(id) },
+    { $set: updates },
+    { returnDocument: "after" }
+  );
+  invalidateCache();
+  return result ? toEmployee(result) : null;
+}
+
 export async function deleteEmployee(id: string): Promise<boolean> {
   const db = await getDb();
   const result = await db.collection("employees").deleteOne({ _id: new ObjectId(id) });
