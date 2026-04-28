@@ -37,7 +37,7 @@ interface FieldErrors {
   photograph?: string;
 }
 
-export default function ApplyForm() {
+export default function ApplyForm({ inviteToken }: { inviteToken: string }) {
   const [fullName, setFullName] = useState("");
   const [countryCode, setCountryCode] = useState("");
   const [phoneLocal, setPhoneLocal] = useState("");
@@ -117,6 +117,7 @@ export default function ApplyForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          inviteToken,
           fullName: fullName.trim(),
           phoneNumber: countryCode ? `${countryCode} ${phoneLocal.trim()}` : phoneLocal.trim(),
           passportNumber: passportNumber.trim().toUpperCase(),

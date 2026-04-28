@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  consumeInvitation,
+  invitationExists,
+  isInviteTokenFormat,
+} from "@/lib/apply-invitations";
 import { isMongoConfigured } from "@/lib/mongodb";
 import { createEmployee } from "@/lib/store";
 import { validateApplicationBody } from "@/lib/validate-application";
@@ -10,6 +15,18 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
+    const inviteToken = typeof body.inviteToken === "string" ? body.inviteToken.trim() : "";
+    if (!inviteToken || !isInviteTokenFormat(inviteToken)) {
+      return NextResponse.json({ error: "Invalid or missing invitation" }, { status: 400 });
+    }
+    const valid = await invitationExists(inviteToken);
+    if (!valid) {
+      return NextResponse.json(
+        { error: "This invitation link is invalid or has already been used" },
+        { status: 410 }
+      );
+    }
+
     const parsed = validateApplicationBody(body);
     if (!parsed.ok) {
       return NextResponse.json({ error: parsed.error }, { status: 400 });
@@ -19,6 +36,8 @@ export async function POST(request: NextRequest) {
       ...parsed.data,
       status: "submitted",
     });
+
+    await consumeInvitation(inviteToken);
 
     return NextResponse.json(
       { id: applicant.id, message: "Application received" },
