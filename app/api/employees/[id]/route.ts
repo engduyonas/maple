@@ -28,9 +28,9 @@ export async function PATCH(
     const updates: Record<string, unknown> = {};
 
     if (body.status !== undefined) {
-      if (!["pending", "approved", "rejected"].includes(body.status)) {
+      if (!["submitted", "pending", "approved", "rejected"].includes(body.status)) {
         return NextResponse.json(
-          { error: "Invalid status. Must be pending, approved, or rejected" },
+          { error: "Invalid status. Must be submitted, pending, approved, or rejected" },
           { status: 400 }
         );
       }

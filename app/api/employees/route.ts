@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validStatuses = ["pending", "approved", "rejected"];
+    const validStatuses = ["submitted", "pending", "approved", "rejected"];
     const applicantStatus = status && validStatuses.includes(status) ? status : "pending";
 
     const applicant = await createEmployee({

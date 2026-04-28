@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     const applicant = await createEmployee({
       ...parsed.data,
-      status: "pending",
+      status: "submitted",
     });
 
     return NextResponse.json(

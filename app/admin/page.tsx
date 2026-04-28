@@ -24,6 +24,15 @@ interface Employee {
 }
 
 const STATUS_CONFIG: Record<string, { row: string; badge: string; dot: string; icon: string; cardBg: string; cardIcon: string; mobileBg: string }> = {
+  submitted: {
+    row: "hover:bg-violet-50/60",
+    badge: "bg-violet-50 text-violet-800 border-violet-200",
+    dot: "bg-violet-500 animate-pulse",
+    icon: "M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75",
+    cardBg: "from-violet-500 to-purple-600",
+    cardIcon: "bg-violet-100 text-violet-700",
+    mobileBg: "bg-violet-50 border-violet-100",
+  },
   pending: {
     row: "hover:bg-amber-50/60",
     badge: "bg-amber-50 text-amber-700 border-amber-200",
@@ -101,7 +110,7 @@ export default function AdminPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("pending");
+  const [statusFilter, setStatusFilter] = useState<string>("submitted");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const router = useRouter();
   const { logout } = useAuth();
@@ -152,9 +161,12 @@ export default function AdminPage() {
   }, [employees, searchQuery, statusFilter]);
 
   const statusCounts = useMemo(() => {
-    const counts = { all: employees.length, pending: 0, approved: 0, rejected: 0 };
+    const counts = { all: employees.length, submitted: 0, pending: 0, approved: 0, rejected: 0 };
     employees.forEach((emp) => {
-      if (emp.status in counts) counts[emp.status as keyof typeof counts]++;
+      if (emp.status === "submitted") counts.submitted++;
+      else if (emp.status === "pending") counts.pending++;
+      else if (emp.status === "approved") counts.approved++;
+      else if (emp.status === "rejected") counts.rejected++;
     });
     return counts;
   }, [employees]);
@@ -224,7 +236,7 @@ export default function AdminPage() {
     else if (an < 18) errors.age = "Must be 18+";
     else if (an > 100) errors.age = "Max 100";
     if (!photograph) errors.photograph = "Photo is required";
-    if (!formStatus || !["pending", "approved", "rejected"].includes(formStatus)) errors.status = "Select a valid status";
+    if (!formStatus || !["submitted", "pending", "approved", "rejected"].includes(formStatus)) errors.status = "Select a valid status";
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -479,15 +491,19 @@ export default function AdminPage() {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
 
         {/* ─── Status Cards ─── */}
-        <div className="grid grid-cols-4 gap-2 sm:gap-4 mb-5 sm:mb-8">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5 mb-5 sm:mb-8">
           {[
             { key: "all" as const, label: "Total", icon: "M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z", iconClass: "bg-gradient-to-br from-mccain-green to-mccain-green-dark text-white" },
+            { key: "submitted" as const, label: "Form received", icon: STATUS_CONFIG.submitted.icon, iconClass: STATUS_CONFIG.submitted.cardIcon },
             { key: "pending" as const, label: "Pending", icon: STATUS_CONFIG.pending.icon, iconClass: STATUS_CONFIG.pending.cardIcon },
             { key: "approved" as const, label: "Approved", icon: STATUS_CONFIG.approved.icon, iconClass: STATUS_CONFIG.approved.cardIcon },
             { key: "rejected" as const, label: "Rejected", icon: STATUS_CONFIG.rejected.icon, iconClass: STATUS_CONFIG.rejected.cardIcon },
           ].map((item) => {
             const isActive = statusFilter === item.key;
-            const bg = item.key !== "all" ? STATUS_CONFIG[item.key].cardBg : "from-mccain-green to-mccain-green-dark";
+            const bg =
+              item.key === "all"
+                ? "from-mccain-green to-mccain-green-dark"
+                : STATUS_CONFIG[item.key]?.cardBg ?? "from-gray-400 to-gray-500";
             return (
               <button
                 key={item.key}
@@ -608,6 +624,7 @@ export default function AdminPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">Status *</label>
                       <select value={formStatus} onChange={(e) => { setFormStatus(e.target.value); if (fieldErrors.status) setFieldErrors((p) => ({ ...p, status: undefined })); }} className={`${inputClass(!!fieldErrors.status)} ${selectChevron}`}>
                         <option value="pending">Pending</option>
+                        <option value="submitted">Submitted (form only)</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
                       </select>
@@ -707,7 +724,7 @@ export default function AdminPage() {
 
             {/* Scrollable filter pills */}
             <div className="flex gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1 pb-0.5">
-              {(["all", "pending", "approved", "rejected"] as const).map((status) => {
+              {(["all", "submitted", "pending", "approved", "rejected"] as const).map((status) => {
                 const isActive = statusFilter === status;
                 const dotColor = status === "all" ? "bg-gray-600" : (STATUS_CONFIG[status]?.dot || "bg-gray-400");
                 return (
@@ -788,6 +805,7 @@ export default function AdminPage() {
                           <td className="px-4 py-4 text-sm text-gray-600">{emp.age}</td>
                           <td className="px-4 py-4">
                             <select value={emp.status} onChange={(e) => handleStatusChange(emp.id, e.target.value)} className={`text-xs font-semibold border rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-mccain-green/40 ${selectChevron} pr-7 cursor-pointer ${cfg.badge}`}>
+                              <option value="submitted">Submitted</option>
                               <option value="pending">Pending</option>
                               <option value="approved">Approved</option>
                               <option value="rejected">Rejected</option>
@@ -856,9 +874,10 @@ export default function AdminPage() {
                             onChange={(e) => handleStatusChange(emp.id, e.target.value)}
                             className={`flex-1 text-xs font-semibold border rounded-xl px-3 py-2.5 focus:outline-none ${selectChevron} pr-8 ${cfg.badge}`}
                           >
-                            <option value="pending">Set Pending</option>
-                            <option value="approved">Set Approved</option>
-                            <option value="rejected">Set Rejected</option>
+                            <option value="submitted">Submitted</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
                           </select>
                           <button
                             onClick={() => handleEdit(emp)}

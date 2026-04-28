@@ -1,6 +1,7 @@
 import { unstable_noStore } from "next/cache";
 import { isMongoConfigured } from "@/lib/mongodb";
 import { getAllEmployees, type Employee } from "@/lib/store";
+import { isPublicVisibleStatus } from "@/lib/employee-status";
 import ApplicantsList from "@/app/components/ApplicantsList";
 
 async function fetchApplicants(): Promise<Employee[]> {
@@ -14,6 +15,6 @@ async function fetchApplicants(): Promise<Employee[]> {
 }
 
 export default async function RecentApplicants() {
-  const applicants = (await fetchApplicants()).filter((e) => e.status === "approved");
+  const applicants = (await fetchApplicants()).filter((e) => isPublicVisibleStatus(e.status));
   return <ApplicantsList applicants={applicants} variant="public" />;
 }
