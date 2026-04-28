@@ -233,16 +233,17 @@ export default function ApplyForm() {
 
         <div>
           <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-400">Contact & ID</h3>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-6">
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-700">Phone *</label>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                 <select
                   value={countryCode}
                   onChange={(e) => setCountryCode(e.target.value)}
-                  className={`w-[104px] shrink-0 rounded-xl border px-2 py-3 text-[15px] sm:text-sm ${fieldErrors.phoneNumber ? "border-red-300" : "border-gray-200"} focus:outline-none focus:ring-2 focus:ring-mccain-green/50`}
+                  aria-label="Country calling code"
+                  className={`w-full shrink-0 rounded-xl border px-3 py-3 text-[15px] sm:w-46 sm:text-sm ${fieldErrors.phoneNumber ? "border-red-300" : "border-gray-200"} bg-white focus:outline-none focus:ring-2 focus:ring-mccain-green/50`}
                 >
-                  <option value="">Code</option>
+                  <option value="">Select country code</option>
                   {COUNTRY_CODES.map((c, idx) => (
                     <option key={`${c.country}-${c.code}-${idx}`} value={c.code}>
                       {c.flag} {c.code}
@@ -252,13 +253,14 @@ export default function ApplyForm() {
                 <input
                   type="text"
                   inputMode="tel"
+                  autoComplete="tel-national"
                   value={phoneLocal}
                   onChange={(e) => {
                     setPhoneLocal(e.target.value);
                     setFieldErrors((p) => ({ ...p, phoneNumber: undefined }));
                   }}
-                  placeholder="Your number"
-                  className={`min-w-0 flex-1 ${inputClass(!!fieldErrors.phoneNumber)}`}
+                  placeholder="Phone number"
+                  className={`w-full ${inputClass(!!fieldErrors.phoneNumber)}`}
                 />
               </div>
               {fieldErrors.phoneNumber && <ErrorText msg={fieldErrors.phoneNumber} />}
@@ -274,7 +276,7 @@ export default function ApplyForm() {
                 }}
                 placeholder="AB1234567"
                 maxLength={20}
-                className={`${inputClass(!!fieldErrors.passportNumber)} font-mono uppercase tracking-widest`}
+                className={`${inputClass(!!fieldErrors.passportNumber)} w-full font-mono uppercase tracking-widest`}
               />
               {fieldErrors.passportNumber && <ErrorText msg={fieldErrors.passportNumber} />}
             </div>
