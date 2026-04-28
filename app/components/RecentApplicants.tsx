@@ -14,6 +14,6 @@ async function fetchApplicants(): Promise<Employee[]> {
 }
 
 export default async function RecentApplicants() {
-  const applicants = await fetchApplicants();
-  return <ApplicantsList applicants={applicants} />;
+  const applicants = (await fetchApplicants()).filter((e) => e.status === "approved");
+  return <ApplicantsList applicants={applicants} variant="public" />;
 }

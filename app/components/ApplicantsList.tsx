@@ -104,7 +104,13 @@ function InfoRow({
   );
 }
 
-export default function ApplicantsList({ applicants }: { applicants: Applicant[] }) {
+export default function ApplicantsList({
+  applicants,
+  variant = "full",
+}: {
+  applicants: Applicant[];
+  variant?: "full" | "public";
+}) {
   const [filter, setFilter] = useState<FilterKey>("all");
 
   const counts = useMemo(() => {
@@ -118,26 +124,42 @@ export default function ApplicantsList({ applicants }: { applicants: Applicant[]
   }, [applicants]);
 
   const visible = useMemo(() => {
+    if (variant === "public") return applicants;
     if (filter === "all") return applicants;
     return applicants.filter((a) => a.status === filter);
-  }, [applicants, filter]);
+  }, [applicants, filter, variant]);
+
+  const showFilters = variant === "full";
 
   return (
     <section className="bg-mccain-gray border-t border-gray-200 py-14 lg:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        {/* Pill */}
-        <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-emerald-700">
-          <HeaderIcon />
-          Applicants
+        <div>
+          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-emerald-700">
+            <HeaderIcon />
+            {variant === "public" ? "Featured" : "Applicants"}
+          </div>
+
+          <h2 className="mt-5 text-4xl font-black tracking-tight text-mccain-dark sm:text-5xl">
+            {variant === "public" ? (
+              <>
+                Featured applicants<span className="text-emerald-500">.</span>
+              </>
+            ) : (
+              <>
+                Application Status<span className="text-amber-400">.</span>
+              </>
+            )}
+          </h2>
+          <p className="mt-2 max-w-xl text-sm text-mccain-gray-dark sm:text-base">
+            {variant === "public"
+              ? "Profiles shown here have been reviewed and approved."
+              : "Applicants and their current status"}
+          </p>
         </div>
 
-        {/* Title */}
-        <h2 className="mt-5 text-4xl font-black tracking-tight text-mccain-dark sm:text-5xl">
-          Application Status<span className="text-amber-400">.</span>
-        </h2>
-        <p className="mt-2 text-sm text-mccain-gray-dark sm:text-base">Applicants and their current status</p>
-
-        {/* Filter pills */}
+        {/* Filter pills — admin-style review only on full dashboard */}
+        {showFilters && (
         <div className="mt-7 flex flex-wrap gap-2">
           {(["all", "pending", "approved", "rejected"] as const).map((key) => {
             const isActive = filter === key;
@@ -160,6 +182,7 @@ export default function ApplicantsList({ applicants }: { applicants: Applicant[]
             );
           })}
         </div>
+        )}
 
         {/* Cards */}
         {visible.length === 0 ? (
@@ -167,14 +190,24 @@ export default function ApplicantsList({ applicants }: { applicants: Applicant[]
             <p className="text-sm font-bold text-mccain-dark">No applicants found</p>
             <p className="mt-1 text-xs text-mccain-gray-dark">
               {applicants.length === 0
-                ? "Applicants added in the admin panel will appear here."
+                ? variant === "public"
+                  ? "No featured applicants yet."
+                  : "Applicants added in the admin panel will appear here."
                 : "Try a different filter."}
             </p>
           </div>
         ) : (
           <ul className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {visible.map((applicant) => {
-              const style = STATUS_STYLES[applicant.status] ?? STATUS_STYLES.pending;
+              const style =
+                variant === "public"
+                  ? {
+                      badge: "bg-white/95 text-emerald-800 border-emerald-200",
+                      dot: "bg-emerald-500",
+                      label: "Featured",
+                      underline: STATUS_STYLES.approved.underline,
+                    }
+                  : (STATUS_STYLES[applicant.status] ?? STATUS_STYLES.pending);
               const phoneRaw = (applicant.phoneNumber || "").trim();
               const phoneDisplay = phoneRaw && !/^\+?\d{0,4}\s*$/.test(phoneRaw) ? phoneRaw : "Private";
               return (
