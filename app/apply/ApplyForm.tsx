@@ -160,6 +160,14 @@ export default function ApplyForm() {
 
   return (
     <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-xl shadow-gray-200/50 sm:p-10">
+      <div className="mb-8 border-b border-gray-100 pb-8">
+        <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-700">Registration</p>
+        <h1 className="mt-2 text-2xl font-black tracking-tight text-mccain-dark sm:text-3xl">Submit your profile</h1>
+        <p className="mt-2 text-sm text-mccain-gray-dark sm:text-base">
+          Complete this form using the link you were sent. Our team reviews every submission before it can appear on
+          the site.
+        </p>
+      </div>
       {error && (
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
           <Icon d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" className="w-5 h-5 shrink-0 text-red-600" />
