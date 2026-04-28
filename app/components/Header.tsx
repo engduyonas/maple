@@ -11,19 +11,40 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
-  const lastTapRef = useRef<number>(0);
+  const logoTouchEndsRef = useRef<number[]>([]);
+  const skipNextLogoClickRef = useRef(false);
   const router = useRouter();
 
-  const handleLogoTap = useCallback(
-    (e: React.MouseEvent) => {
+  const flushOldLogoTouches = useCallback((now: number) => {
+    logoTouchEndsRef.current = logoTouchEndsRef.current.filter((t) => now - t < 450);
+  }, []);
+
+  const handleLogoTouchEnd = useCallback(
+    (e: React.TouchEvent<HTMLAnchorElement>) => {
       const now = Date.now();
-      if (now - lastTapRef.current < 500) {
+      flushOldLogoTouches(now);
+      logoTouchEndsRef.current.push(now);
+      if (logoTouchEndsRef.current.length >= 2) {
         e.preventDefault();
+        logoTouchEndsRef.current = [];
+        skipNextLogoClickRef.current = true;
         router.push("/admin");
-        lastTapRef.current = 0;
+      }
+    },
+    [flushOldLogoTouches, router]
+  );
+
+  const handleLogoClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (skipNextLogoClickRef.current) {
+        e.preventDefault();
+        skipNextLogoClickRef.current = false;
         return;
       }
-      lastTapRef.current = now;
+      if (e.detail >= 2) {
+        e.preventDefault();
+        router.push("/admin");
+      }
     },
     [router]
   );
@@ -55,7 +76,12 @@ export default function Header() {
       </div>
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          <Link href="/" onClick={handleLogoTap} className="shrink-0 flex items-center gap-3 group">
+          <Link
+            href="/"
+            className="shrink-0 flex items-center gap-3 group touch-manipulation select-none"
+            onTouchEnd={handleLogoTouchEnd}
+            onClick={handleLogoClick}
+          >
             <MapleLeafLogo className="text-mccain-green transition-transform group-hover:scale-110" size={44} />
             <div className="leading-none">
               <p className="text-lg font-black tracking-tight text-mccain-dark">Maple Leaf Foods</p>
