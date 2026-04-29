@@ -21,32 +21,20 @@ const CACHE_TTL = 60_000; // re-fetch at most once per minute
 
 function SkeletonCard() {
   return (
-    <div className="w-full max-w-md mx-auto sm:max-w-none bg-white rounded-2xl overflow-hidden border border-gray-100 animate-pulse">
-      <div className="h-44 min-[420px]:h-48 sm:h-56 md:h-60 bg-gray-200" />
-      <div className="p-3 sm:p-4 md:p-5 space-y-2.5 sm:space-y-3.5">
-        <div className="flex items-start gap-2.5 sm:gap-3">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-gray-200 shrink-0" />
-          <div className="space-y-1.5 flex-1 pt-0.5">
-            <div className="h-2 bg-gray-200 rounded-full w-14" />
-            <div className="h-3.5 bg-gray-200 rounded-full w-24" />
+    <div className="w-full bg-white rounded-xl overflow-hidden border border-gray-100 animate-pulse shadow-sm">
+      <div className="h-28 sm:h-36 md:h-40 bg-gray-200" />
+      <div className="p-2 sm:p-2.5 space-y-1 sm:space-y-1.5">
+        {[["w-14", "w-20"], ["w-12", "w-[85%]"], ["w-12", "w-[75%]"]].map(([labelW, valW], i) => (
+          <div key={i} className="flex items-center gap-1.5 sm:gap-2">
+            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md sm:rounded-lg bg-gray-200 shrink-0" />
+            <div className="space-y-1 flex-1 min-w-0">
+              <div className={`h-1.5 bg-gray-200 rounded-full ${labelW}`} />
+              <div className={`h-2.5 bg-gray-200 rounded-full ${valW}`} />
+            </div>
           </div>
-        </div>
-        <div className="flex items-start gap-2.5 sm:gap-3">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-gray-200 shrink-0" />
-          <div className="space-y-1.5 flex-1 pt-0.5">
-            <div className="h-2 bg-gray-200 rounded-full w-10" />
-            <div className="h-3.5 bg-gray-200 rounded-full w-32" />
-          </div>
-        </div>
-        <div className="flex items-start gap-2.5 sm:gap-3">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-gray-200 shrink-0" />
-          <div className="space-y-1.5 flex-1 pt-0.5">
-            <div className="h-2 bg-gray-200 rounded-full w-14" />
-            <div className="h-3.5 bg-gray-200 rounded-full w-28" />
-          </div>
-        </div>
+        ))}
       </div>
-      <div className="h-1 sm:h-1.5 w-full bg-gray-200" />
+      <div className="h-0.5 w-full bg-gray-200" />
     </div>
   );
 }
@@ -153,7 +141,7 @@ export default function EmployeeSection() {
         {/* Content */}
         {loading ? (
           /* Skeleton loading state */
-          <div className="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <SkeletonCard key={i} />
             ))}
@@ -176,7 +164,7 @@ export default function EmployeeSection() {
           </div>
         ) : (
           /* Applicant cards */
-          <div className="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
             {visibleEmployees.map((employee) => (
               <EmployeeCard
                 key={employee.id}
