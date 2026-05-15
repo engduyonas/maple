@@ -126,6 +126,11 @@ export default function AdminPage() {
   const [formStatus, setFormStatus] = useState("pending");
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  const [inviteUrl, setInviteUrl] = useState("");
+  const [inviteBusy, setInviteBusy] = useState(false);
+  const [inviteErr, setInviteErr] = useState("");
+  const [inviteCopied, setInviteCopied] = useState(false);
+
   const fetchEmployees = useCallback(async (force = false) => {
     if (!force && cachedAdminEmployees && Date.now() - adminCacheTimestamp < ADMIN_CACHE_TTL) {
       setEmployeesRaw(cachedAdminEmployees);
@@ -153,11 +158,14 @@ export default function AdminPage() {
   }, [fetchEmployees]);
 
   const filteredEmployees = useMemo(() => {
-    return employees.filter((emp) => {
-      const matchesSearch = emp.fullName.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === "all" || emp.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
+    return employees
+      .filter((emp) => {
+        const matchesSearch = emp.fullName.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === "all" || emp.status === statusFilter;
+        return matchesSearch && matchesStatus;
+      })
+      .slice()
+      .sort((a, b) => a.fullName.localeCompare(b.fullName, undefined, { sensitivity: "base" }));
   }, [employees, searchQuery, statusFilter]);
 
   const statusCounts = useMemo(() => {
@@ -180,6 +188,36 @@ export default function AdminPage() {
     const reader = new FileReader();
     reader.onloadend = () => { const b = reader.result as string; setPhotograph(b); setPhotoPreview(b); };
     reader.readAsDataURL(file);
+  };
+
+  const createInviteLink = async () => {
+    setInviteErr("");
+    setInviteCopied(false);
+    setInviteBusy(true);
+    try {
+      const res = await fetch("/api/admin/apply-invitations", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setInviteErr(typeof data.error === "string" ? data.error : "Could not create link");
+        return;
+      }
+      if (typeof data.url === "string") setInviteUrl(data.url);
+    } catch {
+      setInviteErr("Network error");
+    } finally {
+      setInviteBusy(false);
+    }
+  };
+
+  const copyInviteLink = async () => {
+    if (!inviteUrl) return;
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setInviteCopied(true);
+      window.setTimeout(() => setInviteCopied(false), 2500);
+    } catch {
+      setInviteErr("Could not copy — copy the field manually");
+    }
   };
 
   const resetForm = () => {
@@ -489,6 +527,63 @@ export default function AdminPage() {
       )}
 
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+
+        {/* ─── Invitation link (public registration) ─── */}
+        <div className="mb-5 sm:mb-8 rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4 sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-gray-900">Send a registration link</h3>
+              <p className="mt-1 text-xs text-gray-600 max-w-xl">
+                Generates a random, single-use URL for one applicant. Share it by email or chat — each submission burns
+                that link.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={createInviteLink}
+              disabled={inviteBusy}
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-mccain-green px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-mccain-green-dark disabled:opacity-50 active:scale-[0.98]"
+            >
+              {inviteBusy ? (
+                <>Creating…</>
+              ) : (
+                <>
+                  <Icon d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.657l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.06 7.228" className="w-4 h-4" />
+                  New invitation link
+                </>
+              )}
+            </button>
+          </div>
+          {inviteErr && (
+            <p className="mt-3 text-xs text-red-600 flex items-center gap-1">
+              <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {inviteErr}
+            </p>
+          )}
+          {inviteUrl && (
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <input
+                readOnly
+                value={inviteUrl}
+                className="min-w-0 flex-1 rounded-xl border border-emerald-200/80 bg-white px-3 py-2.5 font-mono text-xs text-gray-800 shadow-inner sm:text-sm"
+                onFocus={(e) => e.target.select()}
+              />
+              <button
+                type="button"
+                onClick={copyInviteLink}
+                className="inline-flex shrink-0 items-center justify-center rounded-xl border border-emerald-300 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 active:scale-[0.98]"
+              >
+                {inviteCopied ? "Copied" : "Copy link"}
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* ─── Status Cards ─── */}
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5 mb-5 sm:mb-8">

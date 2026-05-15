@@ -21,20 +21,20 @@ const CACHE_TTL = 60_000; // re-fetch at most once per minute
 
 function SkeletonCard() {
   return (
-    <div className="w-full bg-white rounded-xl overflow-hidden border border-gray-100 animate-pulse shadow-sm">
-      <div className="h-28 sm:h-36 md:h-40 bg-gray-200" />
-      <div className="p-2 sm:p-2.5 space-y-1 sm:space-y-1.5">
-        {[["w-14", "w-20"], ["w-12", "w-[85%]"], ["w-12", "w-[75%]"]].map(([labelW, valW], i) => (
-          <div key={i} className="flex items-center gap-1.5 sm:gap-2">
-            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md sm:rounded-lg bg-gray-200 shrink-0" />
-            <div className="space-y-1 flex-1 min-w-0">
-              <div className={`h-1.5 bg-gray-200 rounded-full ${labelW}`} />
-              <div className={`h-2.5 bg-gray-200 rounded-full ${valW}`} />
+    <div className="w-full min-w-0 max-w-full bg-white rounded-lg overflow-hidden border border-gray-100 animate-pulse shadow-sm">
+      <div className="h-20 sm:h-28 md:h-32 bg-gray-200" />
+      <div className="p-1.5 sm:p-2 space-y-0.5 sm:space-y-1">
+        {[["w-12", "w-[70%]"], ["w-10", "w-[90%]"], ["w-10", "w-[65%]"]].map(([labelW, valW], i) => (
+          <div key={i} className="flex items-center gap-1 sm:gap-1.5">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded sm:rounded-md bg-gray-200 shrink-0" />
+            <div className="space-y-0.5 flex-1 min-w-0">
+              <div className={`h-1 bg-gray-200 rounded-full ${labelW}`} />
+              <div className={`h-2 bg-gray-200 rounded-full ${valW}`} />
             </div>
           </div>
         ))}
       </div>
-      <div className="h-0.5 w-full bg-gray-200" />
+      <div className="h-px w-full bg-gray-200" />
     </div>
   );
 }
@@ -74,7 +74,7 @@ export default function EmployeeSection() {
 
   const visibleEmployees = useMemo(() => {
     const filtered = activeFilter === "all" ? employees : employees.filter((e) => e.status === activeFilter);
-    return filtered.slice().sort((a, b) => a.fullName.localeCompare(b.fullName));
+    return filtered.slice().sort((a, b) => a.fullName.localeCompare(b.fullName, undefined, { sensitivity: "base" }));
   }, [employees, activeFilter]);
 
   const counts = useMemo(() => {
@@ -93,8 +93,8 @@ export default function EmployeeSection() {
   };
 
   return (
-    <section className="bg-mccain-gray/50 border-t border-gray-200">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-10 sm:py-16">
+    <section className="bg-mccain-gray/50 border-t border-gray-200 min-w-0 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 py-10 sm:py-16 min-w-0">
         {/* Header */}
         <div className="flex flex-col gap-4 mb-6 sm:mb-8">
           <div>
@@ -141,7 +141,7 @@ export default function EmployeeSection() {
         {/* Content */}
         {loading ? (
           /* Skeleton loading state */
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+          <div className="grid w-full min-w-0 gap-1 sm:gap-2 md:gap-3 grid-cols-[repeat(2,minmax(0,1fr))] lg:grid-cols-[repeat(3,minmax(0,1fr))] xl:grid-cols-[repeat(4,minmax(0,1fr))]">
             {Array.from({ length: 4 }).map((_, i) => (
               <SkeletonCard key={i} />
             ))}
@@ -164,7 +164,7 @@ export default function EmployeeSection() {
           </div>
         ) : (
           /* Applicant cards */
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+          <div className="grid w-full min-w-0 gap-1 sm:gap-2 md:gap-3 grid-cols-[repeat(2,minmax(0,1fr))] lg:grid-cols-[repeat(3,minmax(0,1fr))] xl:grid-cols-[repeat(4,minmax(0,1fr))]">
             {visibleEmployees.map((employee) => (
               <EmployeeCard
                 key={employee.id}

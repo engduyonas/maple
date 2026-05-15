@@ -96,13 +96,13 @@ function InfoRow({
   mono?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
+    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gray-100 text-gray-500 sm:h-9 sm:w-9 sm:rounded-lg [&_svg]:h-3.5 [&_svg]:w-3.5 sm:[&_svg]:h-4 sm:[&_svg]:w-4">
         {icon}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">{label}</p>
-        <p className={`mt-0.5 text-sm font-bold text-mccain-dark truncate ${mono ? "font-mono tracking-wide" : ""}`}>
+        <p className="text-[8px] font-semibold uppercase tracking-[0.12em] text-gray-400 sm:text-[10px] sm:tracking-[0.14em]">{label}</p>
+        <p className={`mt-0.5 truncate text-[11px] font-bold text-mccain-dark sm:text-sm ${mono ? "font-mono tracking-wide" : ""}`}>
           {value}
         </p>
       </div>
@@ -130,15 +130,15 @@ export default function ApplicantsList({
   }, [applicants]);
 
   const visible = useMemo(() => {
-    if (filter === "all") return applicants;
-    return applicants.filter((a) => a.status === filter);
+    const rows = filter === "all" ? applicants : applicants.filter((a) => a.status === filter);
+    return rows.slice().sort((a, b) => a.fullName.localeCompare(b.fullName, undefined, { sensitivity: "base" }));
   }, [applicants, filter]);
 
   const showFilters = true;
 
   return (
-    <section className="bg-mccain-gray border-t border-gray-200 py-14 lg:py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+    <section className="bg-mccain-gray border-t border-gray-200 py-14 lg:py-20 min-w-0 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto min-w-0 px-2 sm:px-6">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-emerald-700">
             <HeaderIcon />
@@ -202,7 +202,7 @@ export default function ApplicantsList({
             </p>
           </div>
         ) : (
-          <ul className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <ul className="mt-7 grid w-full min-w-0 list-none grid-cols-2 gap-2 p-0 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
             {visible.map((applicant) => {
               const style = STATUS_STYLES[applicant.status] ?? STATUS_STYLES.pending;
               const phoneRaw = (applicant.phoneNumber || "").trim();
@@ -210,43 +210,43 @@ export default function ApplicantsList({
               return (
                 <li
                   key={applicant.id}
-                  className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-gray-200 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
+                  className="group flex min-w-0 max-w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl sm:rounded-2xl"
                 >
                   {/* Photo + overlays */}
-                  <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
+                  <div className="relative aspect-square w-full min-w-0 overflow-hidden bg-gray-100">
                     {applicant.photograph ? (
                       <Image
                         src={applicant.photograph}
                         alt={applicant.fullName}
                         fill
-                        sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        sizes="(max-width: 1023px) 50vw, (max-width: 1279px) 33vw, 25vw"
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                         unoptimized={applicant.photograph.startsWith("data:")}
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-5xl font-black text-mccain-gray-dark">
+                      <div className="flex h-full w-full items-center justify-center text-2xl font-black text-mccain-gray-dark sm:text-5xl">
                         {applicant.fullName.charAt(0).toUpperCase()}
                       </div>
                     )}
 
                     {/* Status pill */}
                     <span
-                      className={`absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] shadow-sm ${style.badge}`}
+                      className={`absolute right-1.5 top-1.5 inline-flex max-w-[calc(100%-0.75rem)] items-center gap-1 truncate rounded-full border px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-[0.1em] shadow-sm sm:right-3 sm:top-3 sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-[10px] sm:tracking-[0.14em] ${style.badge}`}
                     >
-                      <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
-                      {style.label}
+                      <span className={`h-1 w-1 shrink-0 rounded-full sm:h-1.5 sm:w-1.5 ${style.dot}`} />
+                      <span className="truncate">{style.label}</span>
                     </span>
 
                     {/* Gradient + name overlay */}
-                    <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/85 via-black/55 to-transparent px-4 pb-4 pt-14">
-                      <p className="truncate text-base font-black uppercase tracking-wide text-white">
+                    <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/85 via-black/55 to-transparent px-2 pb-2 pt-10 sm:px-4 sm:pb-4 sm:pt-14">
+                      <p className="truncate text-[11px] font-black uppercase tracking-wide text-white sm:text-base">
                         {applicant.fullName}
                       </p>
                     </div>
                   </div>
 
                   {/* Info rows */}
-                  <div className="flex flex-1 flex-col gap-3 p-4">
+                  <div className="flex flex-1 flex-col gap-2 p-2 sm:gap-3 sm:p-4">
                     <InfoRow
                       icon={<PersonIcon />}
                       label="Gender / Age"
